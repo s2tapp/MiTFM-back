@@ -1,0 +1,62 @@
+{"properties": [
+  {
+    "name": "openai-service.api-key",
+    "type": "java.lang.String",
+    "description": "A description for 'openai-service.api-key'"
+  },
+  {
+    "name": "openai-service.gpt-model",
+    "type": "java.lang.String",
+    "description": "A description for 'openai-service.gpt-model'"
+  },
+  {
+    "name": "openai-service.audio-model",
+    "type": "java.lang.String",
+    "description": "A description for 'openai-service.audio-model'"
+  },
+  {
+    "name": "openai-service.http-client.read-timeout",
+    "type": "java.lang.String",
+    "description": "A description for 'openai-service.http-client.read-timeout'"
+  },
+  {
+    "name": "openai-service.http-client.connect-timeout",
+    "type": "java.lang.String",
+    "description": "A description for 'openai-service.http-client.connect-timeout'"
+  },
+  {
+    "name": "openai-service.urls.base-url",
+    "type": "java.lang.String",
+    "description": "A description for 'openai-service.urls.base-url'"
+  },
+  {
+    "name": "openai-service.urls.chat-url",
+    "type": "java.lang.String",
+    "description": "A description for 'openai-service.urls.chat-url'"
+  },
+  {
+    "name": "openai-service.urls.create-transcription-url",
+    "type": "java.lang.String",
+    "description": "A description for 'openai-service.urls.create-transcription-url'"
+  },
+  {
+    "name": "management.health.circuitbreakers.enabled",
+    "type": "java.lang.String",
+    "description": "A description for 'management.health.circuitbreakers.enabled'"
+  },
+  {
+    "name": "management.health.ratelimiters.enabled",
+    "type": "java.lang.String",
+    "description": "A description for 'management.health.ratelimiters.enabled'"
+  },
+  {
+    "name": "resilience4j.circuitbreaker.configs.default.register-health-indicator",
+    "type": "java.lang.String",
+    "description": "A description for 'resilience4j.circuitbreaker.configs.default.register-health-indicator'"
+  },
+  {
+    "name": "resilience4j.ratelimiter.configs.instances.register-health-indicator",
+    "type": "java.lang.String",
+    "description": "A description for 'resilience4j.ratelimiter.configs.instances.register-health-indicator'"
+  }
+]}
