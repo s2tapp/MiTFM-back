@@ -1,13 +1,16 @@
 package com.ginoquin.springboot.app.controllers;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
+import java.net.MalformedURLException;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,13 +20,10 @@ import com.ginoquin.springboot.app.models.entity.Peticion;
 import com.ginoquin.springboot.app.models.entity.ResultadoEnum;
 import com.ginoquin.springboot.app.models.request.TranscriptionRequest;
 import com.ginoquin.springboot.app.models.response.TranscriptionResponse;
-import com.ginoquin.springboot.app.models.response.WhisperTranscriptionResponse;
+import com.ginoquin.springboot.app.models.service.ProducerService;
 import com.ginoquin.springboot.app.models.service.IPeticionService;
-import com.ginoquin.springboot.app.models.service.OpenAIClientService;
-import com.ginoquin.springboot.app.models.service.Wav2VecService;
+import com.ginoquin.springboot.app.models.service.UploadFileServiceImpl;
 
-import ai.djl.ModelException;
-import ai.djl.translate.TranslateException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,67 +40,76 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin(origins = "*")
 public class ApplicationController {
 
-	private final OpenAIClientService openAIClientService;
-
 	@Autowired
-	private final Wav2VecService wav2VecService;
+	private final ProducerService producerService;
+	
+	@Autowired 
+	private UploadFileServiceImpl fileStorageService;
 
 	@Autowired
 	private final IPeticionService peticionService;
 
-	@Operation(summary = "Transcripción de audio por openai")
+	@Operation(summary = "Transcripción de audio")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Transcripción exitosa"),
 			@ApiResponse(responseCode = "400", description = "Solicitud incorrecta") })
 	@PostMapping(value = "/transcription", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public WhisperTranscriptionResponse createTranscription(@RequestBody TranscriptionRequest transcriptionRequest) {
+	public TranscriptionResponse createTranscription(@RequestBody TranscriptionRequest transcriptionRequest) {
 		log.info("Petición recibida en createTranscription: " + transcriptionRequest);
-		return openAIClientService.createTranscription(transcriptionRequest);
-	}
-
-	@Operation(summary = "Transcripción de audio por wav2vec")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Transcripción exitosa"),
-			@ApiResponse(responseCode = "400", description = "Solicitud incorrecta") })
-	@PostMapping(value = "/transcription2", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public TranscriptionResponse createTranscription2(@RequestBody TranscriptionRequest transcriptionRequest) {
-		log.info("Petición recibida en createTranscription2: " + transcriptionRequest);
-
+		
 		TranscriptionResponse transcriptionResponse = null;
 		Peticion peticion = null;
-
+		String nombreFichero = null;
+		String tecnologia = null;
 		try {
-			Instant inicio = Instant.now();
-
-			transcriptionResponse = wav2VecService.predict(transcriptionRequest.getFile().getInputStream());
-
-			Instant fin = Instant.now();
-
-			Duration duracion = Duration.between(inicio, fin);
-
-			long duracionMillis = duracion.toMillis();
-
-			peticion = Peticion.builder().estado(EstadoEnum.P).resultado(ResultadoEnum.OK)
-					.transcripción(transcriptionResponse.getText()).tiempoProceso(Long.valueOf(duracionMillis)).fecha(new Date())
+			
+			nombreFichero = fileStorageService.save(transcriptionRequest.getFile());
+			tecnologia = transcriptionRequest.getTechnology();
+	        
+	        peticion = Peticion.builder().estado(EstadoEnum.PP).resultado(ResultadoEnum.OK)
+	        		.nombreFichero(nombreFichero)
+					.fecha(new Date())
 					.build();
 
 			peticionService.savePeticion(peticion);
+			
+			transcriptionResponse = producerService.sendAudioAndText(nombreFichero, tecnologia);
+			
+			peticion.setEstado(EstadoEnum.P);			
+			peticion.setTranscripcion(transcriptionResponse.getText());
+			
+			peticionService.savePeticion(peticion);
 
 			return transcriptionResponse;
-
-		} catch (IOException e) {
-			log.error("Error al leer el flujo de entrada.", e);
-			transcriptionResponse = TranscriptionResponse.builder().text("Error al leer el flujo de entrada.").build();
-		} catch (ModelException e) {
-			log.error("Error durante la predicción.", e);
-			transcriptionResponse = TranscriptionResponse.builder().text("Error durante la predicción.").build();
-		} catch (TranslateException e) {
-			log.error("Error durante la traducción.", e);
-			transcriptionResponse = TranscriptionResponse.builder().text("Error durante la traducción.").build();
+	        
+		} catch (Exception e) {
+			log.error("Error al procesar audio.", e);
+			peticion = Peticion.builder().estado(EstadoEnum.P).resultado(ResultadoEnum.E)
+					.nombreFichero(nombreFichero)
+					.fecha(new Date()).build();
+			peticionService.savePeticion(peticion);
+			return transcriptionResponse = TranscriptionResponse.builder().text("Error al procesar audio.").build();
 		}
+		
+	}
 
-		peticion = Peticion.builder().estado(EstadoEnum.P).resultado(ResultadoEnum.E)
-				.transcripción(transcriptionResponse.getText()).tiempoProceso(null).fecha(new Date()).build();
+	@Operation(summary = "Descargar archivo de audio")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Descarga exitosa"),
+			@ApiResponse(responseCode = "400", description = "Solicitud incorrecta") })
+	@GetMapping(value = "/files/{fileName:.+}")
+	public ResponseEntity<Resource> getFile(@PathVariable String fileName) {
+		log.info("Petición recibida en getFile: " + fileName);
+		Resource resource;
+		try {
+			resource = fileStorageService.load(fileName);
 
-		return transcriptionResponse;
+			return ResponseEntity.ok()
+					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+					.body(resource);
+		} catch (MalformedURLException e) {
+			log.error("Error al descargar archivo.", e);
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
 }

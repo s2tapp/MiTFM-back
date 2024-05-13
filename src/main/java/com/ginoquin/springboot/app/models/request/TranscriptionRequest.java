@@ -16,6 +16,6 @@ import lombok.NoArgsConstructor;
 public class TranscriptionRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+    private String technology;
 	private MultipartFile file;
 }

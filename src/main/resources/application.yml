@@ -18,27 +18,32 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2MB
+      max-request-size: 2MB    
+      location: /tmp/springboot-data/
+  rabbitmq:
+     host: ${RABBITMQ_HOST}
+     port: 5672
+     username: guest
+     password: guest
       
 springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
+
+# RabbitMQ
+rabbitmq:
+  queue:
+    name: audio_queue
+    exchange: audioExchange
+    routing: 
+      key: audioRoutinKey
       
-
-# OpenAI Service
-openai-service:
-  api-key: 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
-  gpt-model: gpt-3.5-turbo
-  audio-model: whisper-1
-  http-client:
-    read-timeout: 3000
-    connect-timeout: 3000
-  urls:
-    base-url: https://api.openai.com/v1
-    chat-url: /chat/completions
-    create-transcription-url: /audio/transcriptions
-
 # Management
 management:
   endpoints:

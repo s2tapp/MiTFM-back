@@ -34,15 +34,18 @@ public class Peticion implements Serializable {
 	private Integer id;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "estado", length = 2)
+	@Column(name = "estado", nullable = false, length = 2)
 	private EstadoEnum estado;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "resultado", nullable = false, length = 2)
+	@Column(name = "resultado", length = 2)
 	private ResultadoEnum resultado;
 	
-	@Column(name = "transcripción", length = 4096)
-	private String transcripción;
+	@Column(name="nombreFichero", nullable = false, length = 64)
+	private String nombreFichero;
+	
+	@Column(name = "transcripcion", length = 4096)
+	private String transcripcion;
 		
 	@Column(name = "tiempoProceso", precision = 19, scale = 0)
 	private Long tiempoProceso;

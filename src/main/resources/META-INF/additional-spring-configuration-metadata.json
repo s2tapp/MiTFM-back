@@ -58,5 +58,20 @@
     "name": "resilience4j.ratelimiter.configs.instances.register-health-indicator",
     "type": "java.lang.String",
     "description": "A description for 'resilience4j.ratelimiter.configs.instances.register-health-indicator'"
+  },
+  {
+    "name": "rabbitmq.queue.name",
+    "type": "java.lang.String",
+    "description": "A description for 'rabbitmq.queue.name'"
+  },
+  {
+    "name": "rabbitmq.queue.exchange",
+    "type": "java.lang.String",
+    "description": "A description for 'rabbitmq.queue.exchange'"
+  },
+  {
+    "name": "rabbitmq.queue.routing.key",
+    "type": "java.lang.String",
+    "description": "A description for 'rabbitmq.queue.routing.key'"
   }
 ]}
