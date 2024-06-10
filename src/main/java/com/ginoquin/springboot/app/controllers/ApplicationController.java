@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ginoquin.springboot.app.models.entity.EstadoEnum;
 import com.ginoquin.springboot.app.models.entity.Peticion;
 import com.ginoquin.springboot.app.models.entity.ResultadoEnum;
+import com.ginoquin.springboot.app.models.entity.TechnologyEnum;
 import com.ginoquin.springboot.app.models.request.TranscriptionRequest;
 import com.ginoquin.springboot.app.models.response.TranscriptionResponse;
 import com.ginoquin.springboot.app.models.service.ProducerService;
@@ -68,6 +69,7 @@ public class ApplicationController {
 	        peticion = Peticion.builder().estado(EstadoEnum.PP).resultado(ResultadoEnum.OK)
 	        		.nombreFichero(nombreFichero)
 					.fecha(new Date())
+					.technology(TechnologyEnum.fromCodigo(tecnologia))
 					.build();
 
 			peticionService.savePeticion(peticion);
@@ -76,6 +78,8 @@ public class ApplicationController {
 			
 			peticion.setEstado(EstadoEnum.P);			
 			peticion.setTranscripcion(transcriptionResponse.getText());
+			peticion.setTiempoProceso(transcriptionResponse.getTime());
+			peticion.setConfianza(transcriptionResponse.getConfidence());
 			
 			peticionService.savePeticion(peticion);
 

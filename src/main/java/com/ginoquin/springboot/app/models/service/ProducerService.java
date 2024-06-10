@@ -1,5 +1,6 @@
 package com.ginoquin.springboot.app.models.service;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,11 +41,14 @@ public class ProducerService {
 	   log.info("transcripción recibida de servidor transcripción.");
 	   
 	   if(Objects.isNull(objeto)) {
-		  return TranscriptionResponse.builder().text("Se ha superado el tiempo de respuesta.").build();
+		  return TranscriptionResponse.builder().text("Se ha superado el tiempo de respuesta.")
+				  .time(null).build();
 	   } else {
 		  Map <String, Object> response = (LinkedHashMap<String, Object>) objeto;
 		  
-		  return TranscriptionResponse.builder().text(response.get("respuesta").toString()).build();
+		  return TranscriptionResponse.builder().text(String.valueOf(response.get("respuesta")))
+				  .time(new BigDecimal(String.valueOf(response.get("tiempoProceso"))))
+				  .confidence(new BigDecimal(String.valueOf(response.get("confianza")))).build();
 	   }
     }
 

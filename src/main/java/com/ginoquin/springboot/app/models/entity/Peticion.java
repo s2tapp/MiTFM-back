@@ -1,6 +1,7 @@
 package com.ginoquin.springboot.app.models.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -44,11 +45,18 @@ public class Peticion implements Serializable {
 	@Column(name="nombreFichero", nullable = false, length = 64)
 	private String nombreFichero;
 	
+	@Enumerated(EnumType.STRING)
+	@Column(name = "tecnologia", nullable = false, length = 10)
+	private TechnologyEnum technology;
+	
 	@Column(name = "transcripcion", length = 4096)
 	private String transcripcion;
 		
-	@Column(name = "tiempoProceso", precision = 19, scale = 0)
-	private Long tiempoProceso;
+	@Column(name = "tiempoProceso", precision = 6, scale = 3)
+	private BigDecimal tiempoProceso;
+	
+	@Column(name = "confianza", precision = 4, scale = 3)
+	private BigDecimal confianza;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "fecha", nullable = false, length = 7)
