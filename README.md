@@ -1,6 +1,6 @@
 # TuVozATexto (API)
 
-Proyecto utilizando Spring Boot para [descripción corta del proyecto].
+API utilizando Spring Boot para transcripción de voz a texto.
 
 ## Tabla de Contenidos
 
