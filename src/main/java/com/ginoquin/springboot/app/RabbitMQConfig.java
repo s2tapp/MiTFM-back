@@ -28,7 +28,7 @@ public class RabbitMQConfig {
     // it will create automatic queue, no need to create manually
     @Bean
     Queue queue(){
-        return new Queue(this.queue);
+        return new Queue(this.queue, true);
     }
     
     @Bean
