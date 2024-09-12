@@ -63,7 +63,7 @@ public class ApplicationController {
 		String tecnologia = null;
 		try {
 			
-			nombreFichero = fileStorageService.save(transcriptionRequest.getFile());
+			nombreFichero = this.fileStorageService.save(transcriptionRequest.getFile());
 			tecnologia = transcriptionRequest.getTechnology();
 	        
 	        peticion = Peticion.builder().estado(EstadoEnum.PP).resultado(ResultadoEnum.OK)
