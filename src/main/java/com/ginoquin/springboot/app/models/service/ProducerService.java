@@ -44,12 +44,38 @@ public class ProducerService {
 		  return TranscriptionResponse.builder().text("Se ha superado el tiempo de respuesta.")
 				  .time(null).build();
 	   } else {
-		  Map <String, Object> response = (LinkedHashMap<String, Object>) objeto;
+		  final  Map <String, Object> response = (LinkedHashMap<String, Object>) objeto;
 		  
-		  return TranscriptionResponse.builder().text(String.valueOf(response.get("respuesta")))
-				  .time(new BigDecimal(String.valueOf(response.get("tiempoProceso"))))
-				  .confidence(new BigDecimal(String.valueOf(response.get("confianza")))).build();
+		  final String text = getString(response, "respuesta");
+		  BigDecimal time = getBigDecimal(response, "tiempoProceso");
+		  BigDecimal confidence = getBigDecimal(response, "confianza");
+
+	      return TranscriptionResponse.builder()
+	                .text(text)
+	                .time(time)
+	                .confidence(confidence)
+	                .build();
 	   }
+    }
+    
+    private static String getString(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (Objects.isNull(value) || !(value instanceof String)) {
+            return null;
+        }
+        return String.valueOf(value);
+    }
+
+    private static BigDecimal getBigDecimal(Map<String, Object> map, String key) {
+        Object value = map.get(key);
+        if (Objects.isNull(value) || !(value instanceof Number)) {
+            return null;
+        }
+        try {
+            return new BigDecimal(String.valueOf(value));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
 }

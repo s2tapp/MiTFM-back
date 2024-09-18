@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.core.io.Resource;
@@ -37,13 +38,17 @@ public class UploadFileServiceImpl implements IUploadFileService {
 	@Override
 	public String save(MultipartFile file) throws IOException {
 		
-		String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-		String uniqueFileName = UUID.randomUUID().toString().concat("_").concat(fileName);
+	   String fileName = StringUtils.cleanPath(file.getOriginalFilename());	
+		
+	   long milliseconds = Instant.now().toEpochMilli();
 
-		Path filePath = getPath(uniqueFileName);
-		try (InputStream in = file.getInputStream()) {
-			Files.copy(in, filePath, StandardCopyOption.REPLACE_EXISTING);
-	     }
+       String extension = fileName.substring(fileName.lastIndexOf("."));
+       String uniqueFileName = UUID.randomUUID().toString() + "_" + milliseconds + extension;
+
+	   Path filePath = getPath(uniqueFileName);
+	   try (InputStream in = file.getInputStream()) {
+		   Files.copy(in, filePath, StandardCopyOption.REPLACE_EXISTING);
+	   }
 		
 		return uniqueFileName;
 	}
